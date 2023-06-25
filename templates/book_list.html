@@ -127,7 +127,6 @@
 
 <script>
 	$(document).ready(function() {
-	  // Include CSRF token in AJAX requests
 	  function getCookie(name) {
 		var cookieValue = null;
 		if (document.cookie && document.cookie !== '') {
@@ -144,7 +143,6 @@
 	  }
 	
 	  function csrfSafeMethod(method) {
-		// These HTTP methods do not require CSRF protection
 		return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
 	  }
 	

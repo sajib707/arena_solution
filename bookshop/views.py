@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.urls import reverse
+from django.views import View
+from rest_framework.views import APIView
 
 from bookshop.forms import AddBookForm
 from .models import Book
@@ -51,8 +53,6 @@ def add_to_cart(request):
     return JsonResponse({'error': 'Invalid request'})
 
 
-
-
 def cart(request):
     cart_items = []
     if 'cart' in request.session:
@@ -60,3 +60,22 @@ def cart(request):
         cart_items = Book.objects.filter(id__in=cart_ids)
     return render(request, 'cart.html', {'cart_items': cart_items})
 
+
+
+class AddToCartAPIView(APIView):
+    def post(self, request, format=None):
+        product_id = request.data.get('product_id')
+        if product_id:
+            if 'cart' in request.session:
+                request.session['cart'].append(product_id)
+            else:
+                request.session['cart'] = [product_id]
+
+            cart_count = len(request.session.get('cart', []))
+
+            response_data = {
+                'cart_count': cart_count,
+            }
+            return JsonResponse(response_data)
+        else:
+            return JsonResponse({'error': 'Invalid product_id'})

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bookshop',
     'arena',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

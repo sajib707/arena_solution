@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Book Store</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="format-detection" content="telephone=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="author" content="">
+	<meta name="keywords" content="">
+	<meta name="description" content="">
+
+	<link rel="stylesheet" type="text/css" href="static/css/normalize.css">
+	<link rel="stylesheet" type="text/css" href="static/icomoon/icomoon.css">
+	<link rel="stylesheet" type="text/css" href="static/css/vendor.css">
+	<link rel="stylesheet" type="text/css" href="static/style.css">
+
+	<!-- script
+	================================================== -->
+	<script src="static/js/modernizr.js"></script>
+
+</head>
+
+<body>
+
+<div id="header-wrap">
+
+	<div class="top-content">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="social-links">
+						<ul>
+							<li>
+								<a href="#"><i class="icon icon-facebook"></i></a>
+							</li>
+							<li>
+								<a href="#"><i class="icon icon-twitter"></i></a>
+							</li>
+							<li>
+								<a href="#"><i class="icon icon-youtube-play"></i></a>
+							</li>
+							<li>
+								<a href="#"><i class="icon icon-behance-square"></i></a>
+							</li>
+						</ul>
+					</div><!--social-links-->
+				</div>
+				<div class="col-md-6">
+					<div class="right-element">
+						<a href="#" class="user-account for-buy"><i class="icon icon-user"></i><span>Account</span></a>
+						<a href="{% url 'bookshop:cart' %}">						
+						<span class="cart for-buy" id="cart-icon">
+							<i class="icon icon-clipboard"></i>
+							<span>Cart: <span class="cart-count" id="cart-count">{{ cart_count }}</span> $</span>
+						</span>
+						</a>					  
+						<div class="action-menu">
+							<div class="search-bar">
+								<a href="#" class="search-button search-toggle" data-selector="#header-wrap">
+									<i class="icon icon-search"></i>
+								</a>
+								<form role="search" method="get" class="search-box">
+									<input class="search-field text search-input" placeholder="Search" type="search">
+								</form>
+							</div>
+						</div>
+					</div><!--top-right-->
+				</div>
+			</div>
+		</div>
+	</div><!--top-content-->
+
+	<div>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="breadcum-items">
+						<h3 class="item"><a href="">Book Shop</a></h3>
+					</div>
+				</div>
+				<div class="col-md-6 text-right">
+					<div class="breadcum-items">
+						<h3 class="item"><a href="{% url 'bookshop:add_book' %}">+ Add Book</a></h3>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div><!--header-wrap-->
+
+<section class="padding-large">
+	<div class="container">
+	  <div class="row">
+		<div class="products-grid grid">
+		  {% for book in books %}
+		  <figure class="product-style">
+			<img src="{{ book.image.url }}" alt="Books" class="product-item">
+			<button type="button" class="add-to-cart" data-product-id="{{ book.id }}" data-csrf-token="{% csrf_token %}"> Add to Cart </button>
+			<figcaption>
+			  <h3>{{ book.title }}</h3>
+			  <p>{{ book.author }}</p>
+			  <div class="item-price">$ {{ book.price }}</div>
+			</figcaption>
+		  </figure>
+		  {% endfor %}
+		</div>
+	  </div>
+	</div>
+</section>
+  
+
+<footer id="footer">
+	<!-- Footer content -->
+</footer>
+
+<div id="footer-bottom">
+	<!-- Footer bottom content -->
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/static/js/script.js"></script>
+
+<script>
+	$(document).ready(function() {
+	  // Include CSRF token in AJAX requests
+	  function getCookie(name) {
+		var cookieValue = null;
+		if (document.cookie && document.cookie !== '') {
+		  var cookies = document.cookie.split(';');
+		  for (var i = 0; i < cookies.length; i++) {
+			var cookie = cookies[i].trim();
+			if (cookie.substring(0, name.length + 1) === (name + '=')) {
+			  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+			  break;
+			}
+		  }
+		}
+		return cookieValue;
+	  }
+	
+	  function csrfSafeMethod(method) {
+		// These HTTP methods do not require CSRF protection
+		return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
+	  }
+	
+	  var csrftoken = getCookie('csrftoken');
+	
+	  if (csrftoken) {
+		$('.add-to-cart').on('click', function() {
+		  var productId = $(this).data('product-id');
+	
+		  $.ajaxSetup({
+			beforeSend: function(xhr, settings) {
+			  if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+				xhr.setRequestHeader('X-CSRFToken', csrftoken);
+			  }
+			}
+		  });
+	
+		  $.ajax({
+			type: 'POST',
+			url: '/add_to_cart/',
+			data: {
+			  'product_id': productId
+			},
+			success: function(response) {
+			  if (response.cart_count !== undefined) {
+				$('#cart-count').text(response.cart_count);
+				$('.cart').attr('href', '/cart/');
+			  }
+			},
+			error: function(response) {
+			  console.log('Error:', response);
+			}
+		  });
+		});
+	  }
+	});
+</script>
+	
+
+</body>
+</html>
